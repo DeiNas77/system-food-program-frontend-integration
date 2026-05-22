@@ -11,8 +11,10 @@
     "format:check": "prettier --check .",
     "lint": "eslint",
     "setup": "npm run anchor-build && npm run codama:js",
-    "start": "next start"
+    "start": "next start",
+    "build:client": "node ./scripts/buildClients.ts"
   },
+  "type": "module",
   "description": "Next.js, Tailwind, @solana/kit, Anchor vault program",
   "keywords": [
     "anchor",

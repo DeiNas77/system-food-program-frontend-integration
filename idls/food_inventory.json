@@ -1,0 +1,335 @@
+{
+  "address": "HE6uvfjUH5GCn9WXz8TNZ1NpZqJXFPU3hQbUf7FtkuzJ",
+  "metadata": {
+    "name": "food_inventory",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "Food Program To integrate"
+  },
+  "instructions": [
+    {
+      "name": "add_food",
+      "discriminator": [
+        14,
+        142,
+        28,
+        60,
+        188,
+        155,
+        101,
+        35
+      ],
+      "accounts": [
+        {
+          "name": "owner",
+          "signer": true
+        },
+        {
+          "name": "inventory_food",
+          "writable": true
+        }
+      ],
+      "args": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "quantity",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "create_system_food",
+      "discriminator": [
+        98,
+        179,
+        36,
+        82,
+        24,
+        210,
+        5,
+        94
+      ],
+      "accounts": [
+        {
+          "name": "owner",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "inventory_food",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  102,
+                  111,
+                  111,
+                  100
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "owner"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "name",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "delete_food",
+      "discriminator": [
+        49,
+        236,
+        103,
+        149,
+        25,
+        110,
+        136,
+        25
+      ],
+      "accounts": [
+        {
+          "name": "owner",
+          "signer": true
+        },
+        {
+          "name": "inventory_food",
+          "writable": true
+        }
+      ],
+      "args": [
+        {
+          "name": "name",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "delete_quantity_food",
+      "discriminator": [
+        249,
+        64,
+        252,
+        3,
+        199,
+        218,
+        95,
+        28
+      ],
+      "accounts": [
+        {
+          "name": "owner",
+          "signer": true
+        },
+        {
+          "name": "inventory_food",
+          "writable": true
+        }
+      ],
+      "args": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "quantity",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "show_foods",
+      "discriminator": [
+        96,
+        214,
+        215,
+        92,
+        117,
+        90,
+        35,
+        212
+      ],
+      "accounts": [
+        {
+          "name": "owner",
+          "signer": true
+        },
+        {
+          "name": "inventory_food",
+          "writable": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "show_foods_by_id",
+      "discriminator": [
+        7,
+        46,
+        28,
+        114,
+        145,
+        163,
+        53,
+        243
+      ],
+      "accounts": [
+        {
+          "name": "owner",
+          "signer": true
+        },
+        {
+          "name": "inventory_food",
+          "writable": true
+        }
+      ],
+      "args": [
+        {
+          "name": "name",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "update_food",
+      "discriminator": [
+        234,
+        167,
+        226,
+        206,
+        164,
+        94,
+        223,
+        107
+      ],
+      "accounts": [
+        {
+          "name": "owner",
+          "signer": true
+        },
+        {
+          "name": "inventory_food",
+          "writable": true
+        }
+      ],
+      "args": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "new_quantity",
+          "type": "u64"
+        },
+        {
+          "name": "new_name",
+          "type": {
+            "option": "string"
+          }
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "InventoryFood",
+      "discriminator": [
+        232,
+        121,
+        243,
+        152,
+        167,
+        118,
+        49,
+        117
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "CreateTitleSystemToLoong",
+      "msg": "The name of database should be less or equal a 50 caracters for create a database food"
+    },
+    {
+      "code": 6001,
+      "name": "SpacesForFood",
+      "msg": "There's only have 10 spaces for put foods"
+    },
+    {
+      "code": 6002,
+      "name": "TitleTooLoongForFood",
+      "msg": "The title should be less or equal a 90 characters for the name a food"
+    },
+    {
+      "code": 6003,
+      "name": "InvalidQuantity",
+      "msg": "Quantity must be greater than 0"
+    },
+    {
+      "code": 6004,
+      "name": "FoodAlreadyExists",
+      "msg": "Food already exists in inventory"
+    }
+  ],
+  "types": [
+    {
+      "name": "Food",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "quantity",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "InventoryFood",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "foods",
+            "type": {
+              "vec": {
+                "defined": {
+                  "name": "Food"
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
