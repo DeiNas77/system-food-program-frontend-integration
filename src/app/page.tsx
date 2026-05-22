@@ -5,10 +5,20 @@ import { ThemeToggle } from "../components/theme-toggle";
 import { ClusterSelect } from "../components/cluster-select";
 import { WalletButton } from "../components/wallet-button";
 
-const buttonStyle = ``;
-
 import { Field } from "../components/Field";
 import { ButtonAction } from "../components/ButtonAction";
+
+const exampleInvetory: { name: string; quantity: number }[] = [
+  { name: "Rice", quantity: 50 },
+  {
+    name: "Milk",
+    quantity: 12,
+  },
+  {
+    name: "Eggs",
+    quantity: 120,
+  },
+];
 
 export default function Home() {
   return (
@@ -47,8 +57,8 @@ export default function Home() {
           </section>
 
           {/* Template content */}
-          <div className="grid border-2 border-purple-900 gap-6 lg:grid-cols-[1fr_380px]">
-            <div className="border-2 border-amber-300 p-5">
+          <div className="grid gap-6 lg:grid-cols-[1fr_380px] pb-10">
+            <div className="rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl p-6 shadow-2xl ">
               <div className="mb-8 pl-1">
                 <h2 className="text-md text-4xl font-bold tracking-tigh">
                   Dashboard System Food
@@ -173,7 +183,47 @@ export default function Home() {
                 </section>
               </div>
             </div>
-            <div className="border-2 border-orange-300 ">a</div>
+            <div
+              className="
+      h-fit rounded-3xl border border-white/10
+      bg-white/5 backdrop-blur-xl p-6 shadow-2xl"
+            >
+              <div className="mb-6 flex items-center justify-between">
+                <div>
+                  <h3 className="text-xl font-bold">Inventory Preview</h3>
+
+                  <p className="text-sm text-zinc-500">
+                    Blockchain stored foods
+                  </p>
+                </div>
+
+                <div className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-xs font-semibold  text-emerald-400 ">
+                  Devnet
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                {exampleInvetory.map((food) => (
+                  <div
+                    key={food.name}
+                    className="
+            flex items-center justify-between rounded-2xl border border-white/10 bg-black/20 px-4 py-4 transition-all hover:border-yellow-500/20 hover:bg-yellow-500/10"
+                  >
+                    <div>
+                      <h4 className="font-semibold">{food.name}</h4>
+
+                      <p className="text-sm text-zinc-500">
+                        Food item stored on-chain
+                      </p>
+                    </div>
+
+                    <div className="rounded-xl bg-white/10 px-3 py-2 text-sm font-bold">
+                      {food.quantity}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </main>
       </div>
