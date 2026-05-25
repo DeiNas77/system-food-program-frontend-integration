@@ -7,20 +7,24 @@ import { WalletButton } from "../components/wallet-button";
 
 import { Field } from "../components/Field";
 import { ButtonAction } from "../components/ButtonAction";
-
-const exampleInvetory: { name: string; quantity: number }[] = [
-  { name: "Rice", quantity: 50 },
-  {
-    name: "Milk",
-    quantity: 12,
-  },
-  {
-    name: "Eggs",
-    quantity: 120,
-  },
-];
+import { useState } from "react";
+import { useAddFood } from "../lib/hooks/useAddFood";
+import { useInitializeInventory } from "../lib/hooks/useInitializeSystem";
 
 export default function Home() {
+  const { addFood, loading } = useAddFood();
+  const [food, setFood] = useState<string>("");
+  const [quantity, setQuantity] = useState<string>("");
+  const [foods, setFoods] = useState<
+    {
+      name: string;
+      quantity: bigint;
+    }[]
+  >([]);
+
+  const { initializeInventory, loading: initializing } =
+    useInitializeInventory();
+
   return (
     <div className="relative min-h-screen bg-background text-foreground">
       <GridBackground />
@@ -79,10 +83,23 @@ export default function Home() {
                     </p>
                   </div>
                   <div className="grid gap-4 lg:grid-cols-2">
-                    <Field description="Create Database" type="text" />
+                    <Field
+                      description="Create Database"
+                      type="text"
+                      placeholder="Inventory Food"
+                      disabled
+                    />
                     <Field description="Admin Wallet" type="text" disabled />
                   </div>
-                  <ButtonAction color="cyan" description="Create Inventory" />
+                  <ButtonAction
+                    color="cyan"
+                    description={
+                      initializing ? "Initializing..." : "Create Inventory"
+                    }
+                    onClick={async () => {
+                      await initializeInventory();
+                    }}
+                  />
                 </section>
                 {/* Add Food */}
                 <section className="space-y-5">
@@ -93,13 +110,30 @@ export default function Home() {
                     </p>
                   </div>
                   <div className="grid gap-4 lg:grid-cols-2">
-                    <Field description="Food" type="text" placeholder="apple" />
+                    <Field
+                      description="Food"
+                      type="text"
+                      placeholder="apple"
+                      value={food}
+                      onChange={(e) => setFood(e.target.value)}
+                    />
+
                     <Field
                       description="quantity"
                       type="number"
                       placeholder="5"
+                      value={quantity}
+                      onChange={(e) => setQuantity(e.target.value)}
                     />
-                    <ButtonAction description="Add Food" color="fuchsia" />
+                    <ButtonAction
+                      description={loading ? "Loading..." : "Add Food"}
+                      color="fuchsia"
+                      onClick={async () => {
+                        const result = await addFood(food, Number(quantity));
+
+                        setFoods(result.inventory.data.foods);
+                      }}
+                    />
                   </div>
                 </section>
                 {/* Update Food */}
@@ -203,25 +237,31 @@ export default function Home() {
               </div>
 
               <div className="space-y-4">
-                {exampleInvetory.map((food) => (
-                  <div
-                    key={food.name}
-                    className="
-            flex items-center justify-between rounded-2xl border border-white/10 bg-black/20 px-4 py-4 transition-all hover:border-yellow-500/20 hover:bg-yellow-500/10"
-                  >
-                    <div>
-                      <h4 className="font-semibold">{food.name}</h4>
+                <div className="space-y-4">
+                  {foods.map((food) => (
+                    <div
+                      key={food.name}
+                      className="
+        flex items-center justify-between rounded-2xl
+        border border-white/10 bg-black/20
+        px-4 py-4 transition-all
+        hover:border-yellow-500/20
+        hover:bg-yellow-500/10"
+                    >
+                      <div>
+                        <h4 className="font-semibold">{food.name}</h4>
 
-                      <p className="text-sm text-zinc-500">
-                        Food item stored on-chain
-                      </p>
-                    </div>
+                        <p className="text-sm text-zinc-500">
+                          Food item stored on-chain
+                        </p>
+                      </div>
 
-                    <div className="rounded-xl bg-white/10 px-3 py-2 text-sm font-bold">
-                      {food.quantity}
+                      <div className="rounded-xl bg-white/10 px-3 py-2 text-sm font-bold">
+                        {food.quantity.toString()}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             </div>
           </div>
