@@ -7,11 +7,19 @@ import { WalletButton } from "../components/wallet-button";
 
 import { Field } from "../components/Field";
 import { ButtonAction } from "../components/ButtonAction";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAddFood } from "../lib/hooks/useAddFood";
 import { useInitializeInventory } from "../lib/hooks/useInitializeSystem";
+import {
+  fetchInventoryFood,
+  findInventoryFoodPda,
+} from "../generated/food_inventory";
+import { useSolanaClient } from "../lib/solana-client-context";
+import { useWallet } from "../lib/wallet/context";
 
 export default function Home() {
+  const client = useSolanaClient();
+  const { signer } = useWallet();
   const { addFood, loading } = useAddFood();
   const [food, setFood] = useState<string>("");
   const [quantity, setQuantity] = useState<string>("");
@@ -21,6 +29,22 @@ export default function Home() {
       quantity: bigint;
     }[]
   >([]);
+
+  useEffect(() => {
+    if (!signer) return;
+
+    const loadInventory = async () => {
+      const [inventoryFoodPda] = await findInventoryFoodPda({
+        owner: signer.address,
+      });
+      const inventory = await fetchInventoryFood(client.rpc, inventoryFoodPda);
+      if (inventory?.data?.foods) {
+        setFoods(inventory.data.foods);
+      }
+    };
+
+    loadInventory().catch(console.error);
+  }, [signer]); // se ejecuta cuando la wallet se conecta
 
   const { initializeInventory, loading: initializing } =
     useInitializeInventory();

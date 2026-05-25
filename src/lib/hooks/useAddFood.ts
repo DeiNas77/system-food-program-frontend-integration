@@ -1,7 +1,5 @@
 "use client";
-
 import { useState } from "react";
-
 import {
   appendTransactionMessageInstruction,
   createTransactionMessage,
@@ -12,29 +10,23 @@ import {
   sendAndConfirmTransactionFactory,
   assertIsTransactionWithinSizeLimit,
   assertIsSendableTransaction,
+  getBase58Codec,
 } from "@solana/kit";
-
 import { useSolanaClient } from "../solana-client-context";
-
 import {
   getAddFoodInstruction,
   findInventoryFoodPda,
 } from "@/src/lib/foodProgram/foodProgram";
-
 import { useWallet } from "../wallet/context";
 import { fetchInventoryFood } from "@/src/generated/food_inventory";
 
 export const useAddFood = () => {
   const client = useSolanaClient();
-
   const { signer } = useWallet();
-
   const [loading, setLoading] = useState(false);
 
   const addFood = async (name: string, quantity: number) => {
-    if (!signer) {
-      throw new Error("Wallet not connected");
-    }
+    if (!signer) throw new Error("Wallet not connected");
 
     try {
       setLoading(true);
@@ -42,16 +34,12 @@ export const useAddFood = () => {
       const [inventoryFoodPda] = await findInventoryFoodPda({
         owner: signer?.address,
       });
-
       console.log("OWNER:", signer.address);
       console.log("PDA:", inventoryFoodPda);
 
       const accountInfo = await client.rpc
-        .getAccountInfo(inventoryFoodPda, {
-          encoding: "base64",
-        })
+        .getAccountInfo(inventoryFoodPda, { encoding: "base64" })
         .send();
-
       console.log("ACCOUNT INFO:", accountInfo);
 
       if (!accountInfo.value) {
@@ -64,7 +52,6 @@ export const useAddFood = () => {
         name: name.trim().toLowerCase(),
         quantity: BigInt(quantity),
       });
-
       console.log("NAME:", name);
       console.log("QUANTITY:", quantity);
       console.log("TYPE:", typeof quantity);
@@ -79,6 +66,7 @@ export const useAddFood = () => {
         (tx) => setTransactionMessageFeePayerSigner(signer, tx),
         (tx) =>
           setTransactionMessageLifetimeUsingBlockhash(latestBlockhash, tx),
+
         (tx) => appendTransactionMessageInstruction(instruction, tx)
       );
 
@@ -93,12 +81,17 @@ export const useAddFood = () => {
         rpcSubscriptions: client.rpcSubscriptions,
       });
 
-      const signature = await sendAndConfirmTransaction(signedTransaction, {
+      await sendAndConfirmTransaction(signedTransaction as never, {
         commitment: "confirmed",
       });
 
-      console.log(signature, "Signature");
+      const signaturesMap = (
+        signedTransaction as { signatures: Record<string, Uint8Array> }
+      ).signatures as Record<string, Uint8Array>;
+      const sigBytes = Object.values(signaturesMap)[0];
+      const signature = getBase58Codec().decode(sigBytes);
 
+      console.log(signature, "Signature");
       console.log("Transaction confirmed");
       console.log("Food added successfully");
 

@@ -10,7 +10,11 @@ import {
   useRef,
   type PropsWithChildren,
 } from "react";
-import type { TransactionSigner } from "@solana/kit";
+import type {
+  TransactionModifyingSigner,
+  TransactionSendingSigner,
+  TransactionSigner,
+} from "@solana/kit";
 import type { WalletConnector, WalletSession } from "./types";
 import { discoverWallets, watchWallets } from "./standard";
 import { createWalletSigner } from "./signer";
@@ -29,7 +33,7 @@ type WalletContextValue = {
   connectors: WalletConnector[];
   status: WalletStatus;
   wallet: WalletSession | undefined;
-  signer: TransactionSigner | undefined;
+  signer: ReturnType<typeof createWalletSigner> | undefined;
   error: unknown;
   connect: (connectorId: string) => Promise<void>;
   disconnect: () => Promise<void>;
@@ -121,10 +125,12 @@ export function WalletProvider({ children }: PropsWithChildren) {
     localStorage.removeItem(STORAGE_KEY);
   }, [session]);
 
-  const signer = useMemo(
-    () => (session ? createWalletSigner(session, chain) : undefined),
-    [session, chain]
-  );
+  const signer = useMemo(() => {
+    if (!session) return undefined;
+    return createWalletSigner(session, chain) as
+      | TransactionModifyingSigner
+      | TransactionSendingSigner;
+  }, [session, chain]);
 
   const value = useMemo<WalletContextValue>(
     () => ({
