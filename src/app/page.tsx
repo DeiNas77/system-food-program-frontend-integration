@@ -16,19 +16,44 @@ import {
 } from "../generated/food_inventory";
 import { useSolanaClient } from "../lib/solana-client-context";
 import { useWallet } from "../lib/wallet/context";
+import { useDeleteFoodByQuantity } from "../lib/hooks/useDeleteFoodByQuantity";
+import { useDeleteFood } from "../lib/hooks/useDeleteFood";
+import { useUpdateFood } from "../lib/hooks/useUpdateFood";
 
 export default function Home() {
   const client = useSolanaClient();
   const { signer } = useWallet();
+  //AddFood
   const { addFood, loading } = useAddFood();
   const [food, setFood] = useState<string>("");
   const [quantity, setQuantity] = useState<string>("");
+  //Inventory
   const [foods, setFoods] = useState<
     {
       name: string;
       quantity: bigint;
     }[]
   >([]);
+  //DeleteFoodByQuantity
+  const { deleteFoodByQuantity, loading: deleting } = useDeleteFoodByQuantity();
+  const [deleteFoods, setDeleteFoods] = useState<{
+    nameFood: string;
+    quantity: string;
+  }>({
+    nameFood: "",
+    quantity: "",
+  });
+  //DeleteFoodPermanent
+  const [deleteFoodName, setDeleteFoodName] = useState<string>("");
+  const { deleteFood, loading: deletingPermanent } = useDeleteFood();
+
+  const [updateFoods, setUpdateFood] = useState({
+    name: "",
+    newName: "",
+    quantity: "",
+  });
+
+  const { updateFood, loading: LoadingUpdate } = useUpdateFood();
 
   useEffect(() => {
     if (!signer) return;
@@ -174,21 +199,49 @@ export default function Home() {
                       description="Current Name"
                       type="text"
                       placeholder="Rice"
+                      value={updateFoods.name}
+                      onChange={(e) =>
+                        setUpdateFood({ ...updateFoods, name: e.target.value })
+                      }
                     />
-
                     <Field
                       description="New Name"
                       type="text"
                       placeholder="Eggs"
+                      value={updateFoods.newName}
+                      onChange={(e) =>
+                        setUpdateFood({
+                          ...updateFoods,
+                          newName: e.target.value,
+                        })
+                      }
                     />
-
                     <Field
                       description="New Quantity"
                       type="number"
                       placeholder="50"
+                      value={updateFoods.quantity}
+                      onChange={(e) =>
+                        setUpdateFood({
+                          ...updateFoods,
+                          quantity: e.target.value,
+                        })
+                      }
                     />
                   </div>
-                  <ButtonAction description="Update Food" color="orange" />
+                  <ButtonAction
+                    description={LoadingUpdate ? "Updating..." : "Update Food"}
+                    color="orange"
+                    onClick={async () => {
+                      const result = await updateFood(
+                        updateFoods.name,
+                        Number(updateFoods.quantity),
+                        updateFoods.newName
+                      );
+                      setFoods(result.inventory.data.foods);
+                      setUpdateFood({ name: "", newName: "", quantity: "" });
+                    }}
+                  />
                 </section>
                 {/* Delete Food by Quantity */}
                 <section className="space-y-5">
@@ -207,37 +260,70 @@ export default function Home() {
                       description="Current Name of Food"
                       type="text"
                       placeholder="Meat"
+                      value={deleteFoods.nameFood}
+                      onChange={(e) =>
+                        setDeleteFoods({
+                          ...deleteFoods,
+                          nameFood: e.target.value,
+                        })
+                      }
                     />
 
                     <Field
                       description="Quantity to remove"
                       type="number"
                       placeholder="12"
+                      value={deleteFoods.quantity}
+                      onChange={(e) =>
+                        setDeleteFoods({
+                          ...deleteFoods,
+                          quantity: e.target.value,
+                        })
+                      }
                     />
                   </div>
 
                   <ButtonAction
-                    description="Delete Food by Quantity"
+                    description={
+                      deleting ? "Deleting..." : "Delete Food by Quantity"
+                    }
                     color="emerald"
+                    onClick={async () => {
+                      const result = await deleteFoodByQuantity(
+                        deleteFoods.nameFood,
+                        Number(deleteFoods.quantity)
+                      );
+
+                      setFoods(result.inventory.data.foods);
+                    }}
                   />
                 </section>
                 {/* Remove Food */}
                 <section className="space-y-5">
                   <div className="pl-1">
                     <h3 className="text-lg font-semibold">Delete Food</h3>
-
                     <p className="text-sm text-zinc-500">
                       Permanently remove a food item.
                     </p>
                   </div>
-
                   <Field
                     description="Food to Delete"
                     type="text"
                     placeholder="Rice"
+                    value={deleteFoodName}
+                    onChange={(e) => setDeleteFoodName(e.target.value)}
                   />
-
-                  <ButtonAction description="Delete Food" color="red" />
+                  <ButtonAction
+                    description={
+                      deletingPermanent ? "Deleting..." : "Delete Food"
+                    }
+                    color="red"
+                    onClick={async () => {
+                      const result = await deleteFood(deleteFoodName);
+                      setFoods(result.inventory.data.foods);
+                      setDeleteFoodName("");
+                    }}
+                  />
                 </section>
               </div>
             </div>
